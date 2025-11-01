@@ -82,15 +82,6 @@ Performance is measured using the test loss (Huber Loss value).
 
 ---
 
-## Next Steps
-
-Possible extensions to this project include:
-- Multi-step forecasting (predicting several future points at once)
-- Multivariate time series forecasting (multiple input features)
-- Model comparison using real-world datasets
-- Hyperparameter tuning and model selection
-
----
 
 ## Requirements
 
