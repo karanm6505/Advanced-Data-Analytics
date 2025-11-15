@@ -21,7 +21,32 @@ for i in range(0, len(t), 200):
     noise = np.random.randn(min(200, len(t)-i)) * np.random.uniform(0.1, 0.4)
     y[i:i+200] = amp * np.sin(freq * t[i:i+200]) + noise
 
-df = pd.DataFrame({'time': t, 'value': y})
+# Read CSV - use relative path
+# Change csv_path to the file you want to use. The parser below will take the
+# first two columns as [date, value] regardless of their header names.
+csv_path = "Electric_Production.csv"
+df = pd.read_csv(csv_path, header=0)
+
+# Defensive column handling: take the first two columns as date and value
+if df.shape[1] < 2:
+    raise ValueError(f"CSV at {csv_path} must have at least two columns (date, value)")
+
+orig_cols = [c.strip() for c in df.columns]
+date_col, val_col = orig_cols[0], orig_cols[1]
+
+# Parse date column (coerce errors to NaT)
+df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+
+# Clean value column: remove non-numeric characters except minus and dot, then coerce
+df[val_col] = df[val_col].astype(str).str.strip()
+df[val_col] = df[val_col].str.replace(r"[^0-9eE+\-\.]", "", regex=True)
+df[val_col] = pd.to_numeric(df[val_col], errors='coerce')
+
+# Rename to standardized names and drop invalid rows
+df.rename(columns={date_col: 'Date', val_col: 'value'}, inplace=True)
+df.dropna(subset=['Date', 'value'], inplace=True)
+df.reset_index(drop=True, inplace=True)
+
 
 # -------------------------
 # Create sequences
