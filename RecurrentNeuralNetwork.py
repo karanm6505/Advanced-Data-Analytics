@@ -1,0 +1,130 @@
+import torch
+import torch.nn as nn
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+
+# Fix random seed for reproducibility
+np.random.seed(67)
+torch.manual_seed(67)
+
+# -------------------------
+# Generate synthetic time series data
+# -------------------------
+t = np.arange(0, 200, 0.1)
+y = np.zeros_like(t)
+for i in range(0, len(t), 200):
+    freq = np.random.uniform(0.05, 0.2)
+    amp = np.random.uniform(0.5, 1.5)
+    noise = np.random.randn(min(200, len(t)-i)) * np.random.uniform(0.1, 0.4)
+    y[i:i+200] = amp * np.sin(freq * t[i:i+200]) + noise
+
+# Read CSV - use raw string for Windows path to avoid unicode-escape issues
+csv_path = r"C:\Users\suneela gabbita\Downloads\Advanced-Data-Analytics-main\Advanced-Data-Analytics-main\Electric_Production.csv"
+df = pd.read_csv(csv_path)
+
+# Normalize column name to 'value' (the dataset header is "Daily minimum temperatures")
+if 'Daily minimum temperatures' in df.columns:
+    df.rename(columns={'Daily minimum temperatures': 'value'}, inplace=True)
+elif 'value' not in df.columns:
+    # Fallback: assume the file has two columns [Date, VALUE]
+    df.columns = ['Date', 'value']
+
+# Coerce non-numeric entries (e.g. rows with leading '?') to NaN and drop them
+df['value'] = pd.to_numeric(df['value'], errors='coerce')
+df.dropna(subset=['value'], inplace=True)
+df.reset_index(drop=True, inplace=True)
+
+# -------------------------
+# Create sequences
+# -------------------------
+def create_sequences(data, seq_len):
+    xs, ys = [], []
+    for i in range(len(data) - seq_len):
+        xs.append(data[i:i+seq_len])
+        ys.append(data[i+seq_len])
+    return np.array(xs), np.array(ys)
+
+seq_len = 20
+X, Y = create_sequences(df['value'].values, seq_len)
+
+# -------------------------
+# Train-test split
+# -------------------------
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, shuffle=False)
+
+X_train = torch.tensor(X_train, dtype=torch.float32).unsqueeze(-1)
+Y_train = torch.tensor(Y_train, dtype=torch.float32).unsqueeze(-1)
+X_test = torch.tensor(X_test, dtype=torch.float32).unsqueeze(-1)
+Y_test = torch.tensor(Y_test, dtype=torch.float32).unsqueeze(-1)
+
+# For plotting convenience
+y_train = Y_train.squeeze().numpy()
+y_test = Y_test.squeeze().numpy()
+
+# -------------------------
+# Define RNN model
+# -------------------------
+class RecurrentNeuralNetwork(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size, num_layers=1):
+        super(RecurrentNeuralNetwork, self).__init__()
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.rnn = nn.RNN(input_size, hidden_size, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):    
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        out, _ = self.rnn(x, h0)
+        out = self.fc(out[:, -1, :])
+        return out
+
+# -------------------------
+# Train model
+# -------------------------
+model = RecurrentNeuralNetwork(input_size=1, hidden_size=32, output_size=1)
+optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
+criterion = nn.HuberLoss(delta=1.0)  # delta controls robustness to outliers
+
+num_epochs = 500
+for epoch in range(num_epochs):
+    model.train()
+    optimizer.zero_grad()
+    output = model(X_train)
+    loss = criterion(output, Y_train)
+    loss.backward()
+    optimizer.step()
+
+    if (epoch+1) % 50 == 0:
+        print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {loss.item():.6f}')
+
+# -------------------------
+# Evaluate on Test Data
+# -------------------------
+model.eval()
+with torch.no_grad():
+    predicted_train = model(X_train).squeeze().numpy()
+    predicted_test = model(X_test).squeeze().numpy()
+    test_loss = criterion(torch.tensor(predicted_test), Y_test.squeeze()).item()
+
+print(f"\nTest Loss: {test_loss:.6f}")
+
+# -------------------------
+# Plot Actual vs Predicted
+# -------------------------
+t_rnn = np.arange(len(y_train) + len(y_test))
+
+plt.figure(figsize=(12, 5))
+plt.plot(t_rnn[:len(y_train)], y_train, label='Train Actual (RNN)', color='navy')
+plt.plot(t_rnn[len(y_train):], y_test, label='Test Actual (RNN)', color='limegreen')
+plt.plot(t_rnn[:len(predicted_train)], predicted_train, label='Train Predicted (RNN)', color='crimson', linestyle='--')
+plt.plot(t_rnn[len(y_train):len(y_train)+len(predicted_test)], predicted_test, label='Test Predicted (RNN)', color='gold', linestyle='--')
+
+plt.axvspan(len(y_train), len(y_train)+len(y_test), color='gray', alpha=0.1)
+plt.title('RNN: Train + Test Actual vs Predicted')
+plt.xlabel('Time Step')
+plt.ylabel('Value')
+plt.legend()
+plt.tight_layout()
+plt.show()
