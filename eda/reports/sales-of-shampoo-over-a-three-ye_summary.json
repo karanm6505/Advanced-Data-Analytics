@@ -1,0 +1,44 @@
+{
+  "dataset": "sales-of-shampoo-over-a-three-ye.csv",
+  "n_observations": 36,
+  "datetime_index": {
+    "start": "2000-01-01T00:00:00",
+    "end": "2002-12-01T00:00:00"
+  },
+  "missing_by_column": {
+    "Sales of shampoo over a three year period": 0
+  },
+  "metadata": {
+    "date_col": "Month",
+    "value_cols": [
+      "Sales of shampoo over a three year period"
+    ],
+    "freq": "MS",
+    "target_col": "Sales of shampoo over a three year period",
+    "title": "Shampoo Sales (Synthetic 3-Year Series)"
+  },
+  "analysis": {
+    "target": "Sales of shampoo over a three year period",
+    "stats": {
+      "count": 36.0,
+      "mean": 312.59999999999997,
+      "std": 148.93716412347476,
+      "min": 119.3,
+      "25%": 192.45000000000002,
+      "50%": 280.15,
+      "75%": 411.1,
+      "max": 682.0,
+      "missing": 0,
+      "missing_pct": 0.0,
+      "min_timestamp": "2000-01-01T00:00:00",
+      "max_timestamp": "2002-12-01T00:00:00",
+      "inferred_freq": "MS",
+      "adf": {
+        "adf_statistic": 3.060142083641185,
+        "pvalue": 1.0,
+        "n_lags": 10,
+        "n_obs": 25
+      }
+    }
+  }
+}

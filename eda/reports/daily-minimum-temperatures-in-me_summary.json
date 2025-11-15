@@ -1,0 +1,44 @@
+{
+  "dataset": "daily-minimum-temperatures-in-me.csv",
+  "n_observations": 3650,
+  "datetime_index": {
+    "start": "1981-01-01T00:00:00",
+    "end": "1990-12-31T00:00:00"
+  },
+  "missing_by_column": {
+    "Daily minimum temperatures": 0
+  },
+  "metadata": {
+    "date_col": "Date",
+    "value_cols": [
+      "Daily minimum temperatures"
+    ],
+    "freq": "D",
+    "target_col": "Daily minimum temperatures",
+    "title": "Daily Minimum Temperatures (Melbourne)"
+  },
+  "analysis": {
+    "target": "Daily minimum temperatures",
+    "stats": {
+      "count": 3650.0,
+      "mean": 11.177753424657535,
+      "std": 4.071836899397183,
+      "min": 0.0,
+      "25%": 8.3,
+      "50%": 11.0,
+      "75%": 14.0,
+      "max": 26.3,
+      "missing": 0,
+      "missing_pct": 0.0,
+      "min_timestamp": "1981-01-01T00:00:00",
+      "max_timestamp": "1990-12-31T00:00:00",
+      "inferred_freq": "D",
+      "adf": {
+        "adf_statistic": -4.444804924611672,
+        "pvalue": 0.0002470826300361277,
+        "n_lags": 20,
+        "n_obs": 3629
+      }
+    }
+  }
+}

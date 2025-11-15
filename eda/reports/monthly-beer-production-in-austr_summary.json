@@ -1,0 +1,44 @@
+{
+  "dataset": "monthly-beer-production-in-austr.csv",
+  "n_observations": 476,
+  "datetime_index": {
+    "start": "1956-01-01T00:00:00",
+    "end": "1995-08-01T00:00:00"
+  },
+  "missing_by_column": {
+    "Monthly beer production": 0
+  },
+  "metadata": {
+    "date_col": "Month",
+    "value_cols": [
+      "Monthly beer production"
+    ],
+    "freq": "MS",
+    "target_col": "Monthly beer production",
+    "title": "Monthly Beer Production (Australia)"
+  },
+  "analysis": {
+    "target": "Monthly beer production",
+    "stats": {
+      "count": 476.0,
+      "mean": 136.3953781512605,
+      "std": 33.738724583011134,
+      "min": 64.8,
+      "25%": 112.9,
+      "50%": 139.15,
+      "75%": 158.825,
+      "max": 217.8,
+      "missing": 0,
+      "missing_pct": 0.0,
+      "min_timestamp": "1956-01-01T00:00:00",
+      "max_timestamp": "1995-08-01T00:00:00",
+      "inferred_freq": "MS",
+      "adf": {
+        "adf_statistic": -2.2826614187875696,
+        "pvalue": 0.17762099829132755,
+        "n_lags": 17,
+        "n_obs": 458
+      }
+    }
+  }
+}

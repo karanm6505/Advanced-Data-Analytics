@@ -1,0 +1,384 @@
+{
+  "daily-minimum-temperatures-in-me.csv": {
+    "dataset": "daily-minimum-temperatures-in-me.csv",
+    "n_observations": 3650,
+    "datetime_index": {
+      "start": "1981-01-01T00:00:00",
+      "end": "1990-12-31T00:00:00"
+    },
+    "missing_by_column": {
+      "Daily minimum temperatures": 0
+    },
+    "metadata": {
+      "date_col": "Date",
+      "value_cols": [
+        "Daily minimum temperatures"
+      ],
+      "freq": "D",
+      "target_col": "Daily minimum temperatures",
+      "title": "Daily Minimum Temperatures (Melbourne)"
+    },
+    "analysis": {
+      "target": "Daily minimum temperatures",
+      "stats": {
+        "count": 3650.0,
+        "mean": 11.177753424657535,
+        "std": 4.071836899397183,
+        "min": 0.0,
+        "25%": 8.3,
+        "50%": 11.0,
+        "75%": 14.0,
+        "max": 26.3,
+        "missing": 0,
+        "missing_pct": 0.0,
+        "min_timestamp": "1981-01-01T00:00:00",
+        "max_timestamp": "1990-12-31T00:00:00",
+        "inferred_freq": "D",
+        "adf": {
+          "adf_statistic": -4.444804924611672,
+          "pvalue": 0.0002470826300361277,
+          "n_lags": 20,
+          "n_obs": 3629
+        }
+      }
+    }
+  },
+  "Electric_Production.csv": {
+    "dataset": "Electric_Production.csv",
+    "n_observations": 397,
+    "datetime_index": {
+      "start": "1985-01-01T00:00:00",
+      "end": "2018-01-01T00:00:00"
+    },
+    "missing_by_column": {
+      "IPG2211A2N": 0
+    },
+    "metadata": {
+      "date_col": "DATE",
+      "value_cols": [
+        "IPG2211A2N"
+      ],
+      "freq": "MS",
+      "target_col": "IPG2211A2N",
+      "title": "Monthly Electric Production (USA)"
+    },
+    "analysis": {
+      "target": "IPG2211A2N",
+      "stats": {
+        "count": 397.0,
+        "mean": 88.84721763224182,
+        "std": 15.387833664730902,
+        "min": 55.3151,
+        "25%": 77.1052,
+        "50%": 89.7795,
+        "75%": 100.5244,
+        "max": 129.4048,
+        "missing": 0,
+        "missing_pct": 0.0,
+        "min_timestamp": "1985-01-01T00:00:00",
+        "max_timestamp": "2018-01-01T00:00:00",
+        "inferred_freq": "MS",
+        "adf": {
+          "adf_statistic": -2.2569903500472397,
+          "pvalue": 0.18621469116586947,
+          "n_lags": 15,
+          "n_obs": 381
+        }
+      }
+    }
+  },
+  "monthly-beer-production-in-austr.csv": {
+    "dataset": "monthly-beer-production-in-austr.csv",
+    "n_observations": 476,
+    "datetime_index": {
+      "start": "1956-01-01T00:00:00",
+      "end": "1995-08-01T00:00:00"
+    },
+    "missing_by_column": {
+      "Monthly beer production": 0
+    },
+    "metadata": {
+      "date_col": "Month",
+      "value_cols": [
+        "Monthly beer production"
+      ],
+      "freq": "MS",
+      "target_col": "Monthly beer production",
+      "title": "Monthly Beer Production (Australia)"
+    },
+    "analysis": {
+      "target": "Monthly beer production",
+      "stats": {
+        "count": 476.0,
+        "mean": 136.3953781512605,
+        "std": 33.738724583011134,
+        "min": 64.8,
+        "25%": 112.9,
+        "50%": 139.15,
+        "75%": 158.825,
+        "max": 217.8,
+        "missing": 0,
+        "missing_pct": 0.0,
+        "min_timestamp": "1956-01-01T00:00:00",
+        "max_timestamp": "1995-08-01T00:00:00",
+        "inferred_freq": "MS",
+        "adf": {
+          "adf_statistic": -2.2826614187875696,
+          "pvalue": 0.17762099829132755,
+          "n_lags": 17,
+          "n_obs": 458
+        }
+      }
+    }
+  },
+  "sales-of-shampoo-over-a-three-ye.csv": {
+    "dataset": "sales-of-shampoo-over-a-three-ye.csv",
+    "n_observations": 36,
+    "datetime_index": {
+      "start": "2000-01-01T00:00:00",
+      "end": "2002-12-01T00:00:00"
+    },
+    "missing_by_column": {
+      "Sales of shampoo over a three year period": 0
+    },
+    "metadata": {
+      "date_col": "Month",
+      "value_cols": [
+        "Sales of shampoo over a three year period"
+      ],
+      "freq": "MS",
+      "target_col": "Sales of shampoo over a three year period",
+      "title": "Shampoo Sales (Synthetic 3-Year Series)"
+    },
+    "analysis": {
+      "target": "Sales of shampoo over a three year period",
+      "stats": {
+        "count": 36.0,
+        "mean": 312.59999999999997,
+        "std": 148.93716412347476,
+        "min": 119.3,
+        "25%": 192.45000000000002,
+        "50%": 280.15,
+        "75%": 411.1,
+        "max": 682.0,
+        "missing": 0,
+        "missing_pct": 0.0,
+        "min_timestamp": "2000-01-01T00:00:00",
+        "max_timestamp": "2002-12-01T00:00:00",
+        "inferred_freq": "MS",
+        "adf": {
+          "adf_statistic": 3.060142083641185,
+          "pvalue": 1.0,
+          "n_lags": 10,
+          "n_obs": 25
+        }
+      }
+    }
+  },
+  "LSTM-Multivariate_pollution.csv": {
+    "dataset": "LSTM-Multivariate_pollution.csv",
+    "n_observations": 43800,
+    "datetime_index": {
+      "start": "2010-01-02T00:00:00",
+      "end": "2014-12-31T23:00:00"
+    },
+    "missing_by_column": {
+      "pollution": 0,
+      "dew": 0,
+      "temp": 0,
+      "press": 0,
+      "wnd_dir": 0,
+      "wnd_spd": 0,
+      "snow": 0,
+      "rain": 0
+    },
+    "metadata": {
+      "date_col": "date",
+      "value_cols": [
+        "pollution",
+        "dew",
+        "temp",
+        "press",
+        "wnd_spd",
+        "snow",
+        "rain"
+      ],
+      "categorical_cols": [
+        "wnd_dir"
+      ],
+      "freq": "H",
+      "target_col": "pollution",
+      "title": "Beijing PM2.5 and Weather (Multivariate)"
+    },
+    "analysis": {
+      "target": "pollution",
+      "stats": {
+        "pollution": {
+          "count": 43800.0,
+          "mean": 94.01351598173515,
+          "std": 92.25227626858599,
+          "min": 0.0,
+          "25%": 24.0,
+          "50%": 68.0,
+          "75%": 132.25,
+          "max": 994.0,
+          "missing": 0,
+          "missing_pct": 0.0,
+          "min_timestamp": "2010-01-02T00:00:00",
+          "max_timestamp": "2014-12-31T23:00:00",
+          "inferred_freq": "H",
+          "adf": {
+            "adf_statistic": -21.004108528409134,
+            "pvalue": 0.0,
+            "n_lags": 55,
+            "n_obs": 43744
+          }
+        },
+        "dew": {
+          "count": 43800.0,
+          "mean": 1.8285159817351597,
+          "std": 14.429326420040104,
+          "min": -40.0,
+          "25%": -10.0,
+          "50%": 2.0,
+          "75%": 15.0,
+          "max": 28.0,
+          "missing": 0,
+          "missing_pct": 0.0,
+          "min_timestamp": "2010-01-02T00:00:00",
+          "max_timestamp": "2014-12-31T23:00:00",
+          "inferred_freq": "H",
+          "adf": {
+            "adf_statistic": -6.122923447787036,
+            "pvalue": 8.767003921016141e-08,
+            "n_lags": 55,
+            "n_obs": 43744
+          }
+        },
+        "temp": {
+          "count": 43800.0,
+          "mean": 12.45904109589048,
+          "std": 12.193384145014077,
+          "min": -19.0,
+          "25%": 2.0,
+          "50%": 14.0,
+          "75%": 23.0,
+          "max": 42.0,
+          "missing": 0,
+          "missing_pct": 0.0,
+          "min_timestamp": "2010-01-02T00:00:00",
+          "max_timestamp": "2014-12-31T23:00:00",
+          "inferred_freq": "H",
+          "adf": {
+            "adf_statistic": -3.938179095852489,
+            "pvalue": 0.0017711619385391267,
+            "n_lags": 49,
+            "n_obs": 43750
+          }
+        },
+        "press": {
+          "count": 43800.0,
+          "mean": 1016.447305936073,
+          "std": 10.271411470532298,
+          "min": 991.0,
+          "25%": 1008.0,
+          "50%": 1016.0,
+          "75%": 1025.0,
+          "max": 1046.0,
+          "missing": 0,
+          "missing_pct": 0.0,
+          "min_timestamp": "2010-01-02T00:00:00",
+          "max_timestamp": "2014-12-31T23:00:00",
+          "inferred_freq": "H",
+          "adf": {
+            "adf_statistic": -7.392935556311221,
+            "pvalue": 7.913244858989232e-11,
+            "n_lags": 55,
+            "n_obs": 43744
+          }
+        },
+        "wnd_spd": {
+          "count": 43800.0,
+          "mean": 23.894307077625573,
+          "std": 50.022729033177576,
+          "min": 0.45,
+          "25%": 1.79,
+          "50%": 5.37,
+          "75%": 21.91,
+          "max": 585.6,
+          "missing": 0,
+          "missing_pct": 0.0,
+          "min_timestamp": "2010-01-02T00:00:00",
+          "max_timestamp": "2014-12-31T23:00:00",
+          "inferred_freq": "H",
+          "adf": {
+            "adf_statistic": -33.91354933148128,
+            "pvalue": 0.0,
+            "n_lags": 5,
+            "n_obs": 43794
+          }
+        },
+        "snow": {
+          "count": 43800.0,
+          "mean": 0.052762557077625574,
+          "std": 0.7605820322318377,
+          "min": 0.0,
+          "25%": 0.0,
+          "50%": 0.0,
+          "75%": 0.0,
+          "max": 27.0,
+          "missing": 0,
+          "missing_pct": 0.0,
+          "min_timestamp": "2010-01-02T00:00:00",
+          "max_timestamp": "2014-12-31T23:00:00",
+          "inferred_freq": "H",
+          "adf": {
+            "adf_statistic": -27.343205425805202,
+            "pvalue": 0.0,
+            "n_lags": 55,
+            "n_obs": 43744
+          }
+        },
+        "rain": {
+          "count": 43800.0,
+          "mean": 0.1950228310502283,
+          "std": 1.4162472175177305,
+          "min": 0.0,
+          "25%": 0.0,
+          "50%": 0.0,
+          "75%": 0.0,
+          "max": 36.0,
+          "missing": 0,
+          "missing_pct": 0.0,
+          "min_timestamp": "2010-01-02T00:00:00",
+          "max_timestamp": "2014-12-31T23:00:00",
+          "inferred_freq": "H",
+          "adf": {
+            "adf_statistic": -33.76093749077597,
+            "pvalue": 0.0,
+            "n_lags": 22,
+            "n_obs": 43777
+          }
+        }
+      },
+      "missing": {
+        "pollution": 0,
+        "dew": 0,
+        "temp": 0,
+        "press": 0,
+        "wnd_spd": 0,
+        "snow": 0,
+        "rain": 0,
+        "wnd_dir": 0
+      }
+    },
+    "categoricals": {
+      "wnd_dir": {
+        "SE": 15290,
+        "NW": 14130,
+        "cv": 9384,
+        "NE": 4996
+      }
+    }
+  }
+}
