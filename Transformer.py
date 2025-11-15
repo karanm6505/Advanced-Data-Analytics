@@ -1,8 +1,13 @@
-"""Vanilla RNN baseline for the multivariate pollution forecasting task."""
+"""Transformer-based baseline for multivariate time-series forecasting.
 
+This script trains a sequence-to-one Transformer model on the Beijing PM2.5
+pollution dataset (multivariate) and reports RMSE/MAE metrics. It is designed
+as the Transformer component of the Phase 1 correlational baselines.
+"""
 from __future__ import annotations
 
 import argparse
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple
@@ -14,6 +19,7 @@ import torch.nn as nn
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, Dataset
+
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,7 +36,8 @@ class DatasetConfig:
     input_window: int = 48
     forecast_horizon: int = 1
     test_ratio: float = 0.2
-    test_csv_path: Optional[Path] = DEFAULT_TEST_PATH
+    test_csv_path: Optional[Path] = None
+
 
 
 def seed_everything(seed: int = TORCH_SEED) -> None:
@@ -127,23 +134,59 @@ def prepare_dataloaders(
     return train_loader, test_loader, scaler, target_idx
 
 
-class RecurrentNeuralNetwork(nn.Module):
-    def __init__(self, num_features: int, hidden_size: int, num_layers: int, dropout: float) -> None:
+# ---------------------------------------------------------------------------
+# Model definition
+# ---------------------------------------------------------------------------
+
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000) -> None:
         super().__init__()
-        self.rnn = nn.RNN(
-            input_size=num_features,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            batch_first=True,
-            nonlinearity="tanh",
-        )
-        self.dropout = nn.Dropout(dropout)
-        self.head = nn.Linear(hidden_size, 1)
+        self.dropout = nn.Dropout(p=dropout)
+
+        position = torch.arange(0, max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
+        pe = torch.zeros(max_len, d_model)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        self.register_buffer("pe", pe.unsqueeze(0))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        output, _ = self.rnn(x)
-        summary = self.dropout(output[:, -1, :])
-        return self.head(summary).squeeze(-1)
+        # x shape: (batch, seq_len, d_model)
+        seq_len = x.size(1)
+        x = x + self.pe[:, :seq_len]
+        return self.dropout(x)
+
+
+class TimeSeriesTransformer(nn.Module):
+    def __init__(
+        self,
+        num_features: int,
+        d_model: int = 64,
+        nhead: int = 4,
+        num_layers: int = 2,
+        dim_feedforward: int = 128,
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.input_projection = nn.Linear(num_features, d_model)
+        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward, dropout=dropout, batch_first=True)
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.positional_encoding = PositionalEncoding(d_model=d_model, dropout=dropout)
+        self.decoder = nn.Sequential(nn.LayerNorm(d_model), nn.Linear(d_model, 1))
+
+    def forward(self, src: torch.Tensor) -> torch.Tensor:
+        x = self.input_projection(src)
+        x = self.positional_encoding(x)
+        encoded = self.encoder(x)
+        summary_vector = encoded[:, -1, :]
+        output = self.decoder(summary_vector)
+        return output.squeeze(-1)
+
+
+# ---------------------------------------------------------------------------
+# Training & evaluation routines
+# ---------------------------------------------------------------------------
 
 
 def train_epoch(model: nn.Module, loader: DataLoader, criterion: nn.Module, optimizer: torch.optim.Optimizer) -> float:
@@ -153,8 +196,8 @@ def train_epoch(model: nn.Module, loader: DataLoader, criterion: nn.Module, opti
         features = features.to(DEVICE)
         targets = targets.to(DEVICE)
         optimizer.zero_grad()
-        preds = model(features)
-        loss = criterion(preds, targets)
+        outputs = model(features)
+        loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
         running_loss += loss.item() * features.size(0)
@@ -182,13 +225,18 @@ def evaluate_metrics(
     preds_unscaled = preds * target_scale + target_mean
     truths_unscaled = truths * target_scale + target_mean
 
-    rmse = float(np.sqrt(mean_squared_error(truths_unscaled, preds_unscaled)))
-    mae = float(mean_absolute_error(truths_unscaled, preds_unscaled))
+    rmse = math.sqrt(mean_squared_error(truths_unscaled, preds_unscaled))
+    mae = mean_absolute_error(truths_unscaled, preds_unscaled)
     return rmse, mae
 
 
+# ---------------------------------------------------------------------------
+# CLI orchestration
+# ---------------------------------------------------------------------------
+
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train a vanilla RNN baseline on the multivariate pollution dataset.")
+    parser = argparse.ArgumentParser(description="Train a Transformer baseline on the multivariate pollution dataset.")
     parser.add_argument("--data-path", type=Path, default=DEFAULT_DATA_PATH, help="Path to the multivariate CSV file.")
     parser.add_argument("--test-path", type=Path, default=DEFAULT_TEST_PATH, help="Optional path to an external test CSV file.")
     parser.add_argument("--epochs", type=int, default=30, help="Number of training epochs.")
@@ -197,9 +245,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--forecast-horizon", type=int, default=1, help="Number of steps ahead to forecast.")
     parser.add_argument("--learning-rate", type=float, default=1e-3, help="Optimizer learning rate.")
     parser.add_argument("--weight-decay", type=float, default=1e-5, help="Weight decay for the optimizer.")
-    parser.add_argument("--hidden-size", type=int, default=64, help="Hidden state dimension of the RNN.")
-    parser.add_argument("--layers", type=int, default=2, help="Number of RNN layers.")
-    parser.add_argument("--dropout", type=float, default=0.1, help="Dropout applied to the last hidden state.")
+    parser.add_argument("--d-model", type=int, default=64, help="Transformer model dimension.")
+    parser.add_argument("--nhead", type=int, default=4, help="Number of attention heads.")
+    parser.add_argument("--layers", type=int, default=2, help="Transformer encoder layers.")
+    parser.add_argument("--ff-dim", type=int, default=128, help="Feedforward dimension inside Transformer blocks.")
+    parser.add_argument("--dropout", type=float, default=0.1, help="Dropout probability.")
     return parser.parse_args()
 
 
@@ -217,10 +267,12 @@ def main() -> None:
 
     train_loader, test_loader, scaler, target_idx = prepare_dataloaders(config, batch_size=args.batch_size)
 
-    model = RecurrentNeuralNetwork(
+    model = TimeSeriesTransformer(
         num_features=len(NUMERIC_COLUMNS),
-        hidden_size=args.hidden_size,
+        d_model=args.d_model,
+        nhead=args.nhead,
         num_layers=args.layers,
+        dim_feedforward=args.ff_dim,
         dropout=args.dropout,
     ).to(DEVICE)
 
@@ -231,7 +283,10 @@ def main() -> None:
         train_loss = train_epoch(model, train_loader, criterion, optimizer)
         if epoch % 5 == 0 or epoch == args.epochs:
             rmse, mae = evaluate_metrics(model, test_loader, scaler, target_idx)
-            print(f"Epoch {epoch:03d}: train_loss={train_loss:.4f} | test_RMSE={rmse:.3f} | test_MAE={mae:.3f}")
+            print(
+                f"Epoch {epoch:03d}: train_loss={train_loss:.4f} | test_RMSE={rmse:.3f} | test_MAE={mae:.3f}",
+                flush=True,
+            )
 
     train_rmse, train_mae = evaluate_metrics(model, train_loader, scaler, target_idx)
     test_rmse, test_mae = evaluate_metrics(model, test_loader, scaler, target_idx)
