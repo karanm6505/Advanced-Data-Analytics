@@ -20,7 +20,21 @@ for i in range(0, len(t), 200):
     noise = np.random.randn(min(200, len(t)-i)) * np.random.uniform(0.1, 0.4)
     y[i:i+200] = amp * np.sin(freq * t[i:i+200]) + noise
 
-df = pd.DataFrame({'time': t, 'value': y})
+# Read CSV - use relative path
+csv_path = "Electric_Production.csv"
+df = pd.read_csv(csv_path)
+
+# Normalize column name to 'value' (the dataset header is "Daily minimum temperatures")
+if 'Daily minimum temperatures' in df.columns:
+    df.rename(columns={'Daily minimum temperatures': 'value'}, inplace=True)
+elif 'value' not in df.columns:
+    # Fallback: assume the file has two columns [Date, VALUE]
+    df.columns = ['Date', 'value']
+
+# Coerce non-numeric entries (e.g. rows with leading '?') to NaN and drop them
+df['value'] = pd.to_numeric(df['value'], errors='coerce')
+df.dropna(subset=['value'], inplace=True)
+df.reset_index(drop=True, inplace=True)
 
 # -------------------------
 # Create sequences
