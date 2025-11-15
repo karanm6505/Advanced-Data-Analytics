@@ -5,6 +5,7 @@ This project implements and compares four neural network architectures for small
 - Gated Recurrent Unit (GRU)
 - Recurrent Neural Network (RNN)
 - Temporal Convolutional Network (TCN)
+- Gradient Boosted Trees (XGBoost)
 
 The goal is to forecast continuous time-dependent values using synthetic tabular data. The dataset represents a single time series with random variations in amplitude, frequency, and noise to simulate realistic temporal behavior.
 
@@ -21,6 +22,7 @@ The workflow includes:
 3. Training the LSTM, GRU, RNN, and TCN models.
 4. Evaluating model performance on test data.
 5. Visualizing actual vs. predicted results.
+6. Training a gradient-boosted baseline using XGBoost.
 
 ---
 
@@ -72,6 +74,27 @@ Each data point depends on the previous sequence of 20 time steps (sequence leng
 - **Learning Rate:** 3e-4  
 - **Epochs:** 500  
 - **Batching:** Entire dataset used in each epoch (suitable for small-scale)
+
+---
+
+## XGBoost Baseline
+
+The `run_xgboost.py` script demonstrates a tree-based regressor trained on the Kaggle
+pollution dataset (`LSTM-Multivariate_pollution.csv`). It performs the following steps:
+
+1. Loads the dataset without external dependencies such as pandas or scikit-learn.
+2. Converts wind direction into one-hot encoded features manually.
+3. Trains an XGBoost model via the low-level `xgboost.train` API.
+4. Reports RMSE, MAE, and R² for validation and optional test datasets.
+5. Writes predictions to `xgboost_predictions.csv` for downstream analysis.
+
+To run the script:
+
+```powershell
+python run_xgboost.py
+```
+
+Ensure the Kaggle CSV files reside in the project root or update the script paths.
 
 ---
 
