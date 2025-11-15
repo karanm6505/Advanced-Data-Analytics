@@ -1,0 +1,44 @@
+{
+  "dataset": "Electric_Production.csv",
+  "n_observations": 397,
+  "datetime_index": {
+    "start": "1985-01-01T00:00:00",
+    "end": "2018-01-01T00:00:00"
+  },
+  "missing_by_column": {
+    "IPG2211A2N": 0
+  },
+  "metadata": {
+    "date_col": "DATE",
+    "value_cols": [
+      "IPG2211A2N"
+    ],
+    "freq": "MS",
+    "target_col": "IPG2211A2N",
+    "title": "Monthly Electric Production (USA)"
+  },
+  "analysis": {
+    "target": "IPG2211A2N",
+    "stats": {
+      "count": 397.0,
+      "mean": 88.84721763224182,
+      "std": 15.387833664730902,
+      "min": 55.3151,
+      "25%": 77.1052,
+      "50%": 89.7795,
+      "75%": 100.5244,
+      "max": 129.4048,
+      "missing": 0,
+      "missing_pct": 0.0,
+      "min_timestamp": "1985-01-01T00:00:00",
+      "max_timestamp": "2018-01-01T00:00:00",
+      "inferred_freq": "MS",
+      "adf": {
+        "adf_statistic": -2.2569903500472397,
+        "pvalue": 0.18621469116586947,
+        "n_lags": 15,
+        "n_obs": 381
+      }
+    }
+  }
+}
