@@ -6,6 +6,7 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple
+import copy
 
 import numpy as np
 import pandas as pd
@@ -199,6 +200,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--hidden-size", type=int, default=64, help="Hidden state dimension of the LSTM.")
     parser.add_argument("--layers", type=int, default=2, help="Number of LSTM layers.")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout applied between LSTM layers.")
+    parser.add_argument("--log-every", type=int, default=5, help="How often to log training progress (epochs).")
     return parser.parse_args()
 
 
@@ -226,11 +228,28 @@ def main() -> None:
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 
+    best_state = None
+    best_epoch = 0
+    best_val_rmse = float("inf")
+
     for epoch in range(1, args.epochs + 1):
         train_loss = train_epoch(model, train_loader, criterion, optimizer)
-        if epoch % 5 == 0 or epoch == args.epochs:
-            rmse, mae = evaluate_metrics(model, test_loader, scaler, target_idx)
-            print(f"Epoch {epoch:03d}: train_loss={train_loss:.4f} | test_RMSE={rmse:.3f} | test_MAE={mae:.3f}")
+        val_rmse, val_mae = evaluate_metrics(model, test_loader, scaler, target_idx)
+
+        if val_rmse < best_val_rmse:
+            best_val_rmse = val_rmse
+            best_epoch = epoch
+            best_state = copy.deepcopy(model.state_dict())
+
+        if epoch % args.log_every == 0 or epoch == 1 or epoch == args.epochs or best_epoch == epoch:
+            print(
+                f"Epoch {epoch:03d}: train_loss={train_loss:.4f} | "
+                f"val_RMSE={val_rmse:.3f} | val_MAE={val_mae:.3f} | "
+                f"best_RMSE={best_val_rmse:.3f} @ epoch {best_epoch}"
+            )
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
 
     train_rmse, train_mae = evaluate_metrics(model, train_loader, scaler, target_idx)
     test_rmse, test_mae = evaluate_metrics(model, test_loader, scaler, target_idx)

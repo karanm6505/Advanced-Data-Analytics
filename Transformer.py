@@ -7,6 +7,7 @@ as the Transformer component of the Phase 1 correlational baselines.
 from __future__ import annotations
 
 import argparse
+import copy
 import math
 from dataclasses import dataclass
 from pathlib import Path
@@ -189,7 +190,13 @@ class TimeSeriesTransformer(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-def train_epoch(model: nn.Module, loader: DataLoader, criterion: nn.Module, optimizer: torch.optim.Optimizer) -> float:
+def train_epoch(
+    model: nn.Module,
+    loader: DataLoader,
+    criterion: nn.Module,
+    optimizer: torch.optim.Optimizer,
+    grad_clip: float = 0.0,
+) -> float:
     model.train()
     running_loss = 0.0
     for features, targets in loader:
@@ -199,6 +206,8 @@ def train_epoch(model: nn.Module, loader: DataLoader, criterion: nn.Module, opti
         outputs = model(features)
         loss = criterion(outputs, targets)
         loss.backward()
+        if grad_clip > 0:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
         optimizer.step()
         running_loss += loss.item() * features.size(0)
     return running_loss / len(loader.dataset)
@@ -250,6 +259,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--layers", type=int, default=2, help="Transformer encoder layers.")
     parser.add_argument("--ff-dim", type=int, default=128, help="Feedforward dimension inside Transformer blocks.")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout probability.")
+    parser.add_argument("--patience", type=int, default=5, help="Epochs to wait for validation RMSE improvement before stopping.")
+    parser.add_argument("--min-delta", type=float, default=0.0, help="Minimum RMSE improvement to reset patience.")
+    parser.add_argument("--log-every", type=int, default=5, help="How often to log progress (epochs).")
+    parser.add_argument("--grad-clip", type=float, default=0.0, help="Gradient-norm clipping value (0 disables clipping).")
     return parser.parse_args()
 
 
@@ -279,14 +292,42 @@ def main() -> None:
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 
+    best_state = None
+    best_epoch = 0
+    best_val_rmse = float("inf")
+    patience_counter = 0
+
     for epoch in range(1, args.epochs + 1):
-        train_loss = train_epoch(model, train_loader, criterion, optimizer)
-        if epoch % 5 == 0 or epoch == args.epochs:
-            rmse, mae = evaluate_metrics(model, test_loader, scaler, target_idx)
+        train_loss = train_epoch(model, train_loader, criterion, optimizer, grad_clip=args.grad_clip)
+        val_rmse, val_mae = evaluate_metrics(model, test_loader, scaler, target_idx)
+
+        improved = val_rmse + args.min_delta < best_val_rmse
+        if improved:
+            best_val_rmse = val_rmse
+            best_epoch = epoch
+            best_state = copy.deepcopy(model.state_dict())
+            patience_counter = 0
+        else:
+            patience_counter += 1
+
+        if epoch % args.log_every == 0 or improved or epoch == args.epochs:
             print(
-                f"Epoch {epoch:03d}: train_loss={train_loss:.4f} | test_RMSE={rmse:.3f} | test_MAE={mae:.3f}",
+                f"Epoch {epoch:03d}: train_loss={train_loss:.4f} | "
+                f"val_RMSE={val_rmse:.3f} | val_MAE={val_mae:.3f} | "
+                f"best_RMSE={best_val_rmse:.3f} @ epoch {best_epoch}",
                 flush=True,
             )
+
+        if patience_counter >= args.patience:
+            print(
+                f"Early stopping triggered at epoch {epoch} "
+                f"(no RMSE improvement for {args.patience} epochs).",
+                flush=True,
+            )
+            break
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
 
     train_rmse, train_mae = evaluate_metrics(model, train_loader, scaler, target_idx)
     test_rmse, test_mae = evaluate_metrics(model, test_loader, scaler, target_idx)
