@@ -1,0 +1,9 @@
+,pollution,dew,temp,press,wnd_spd,snow,rain,wnd_dir
+pollution,0,-1,1,0,1,0,1,1
+dew,1,0,1,1,1,0,1,0
+temp,-1,-1,0,-1,0,0,0,0
+press,0,-1,-1,0,-1,0,0,0
+wnd_spd,-1,-1,0,1,0,0,0,1
+snow,0,0,0,0,0,0,0,0
+rain,-1,-1,0,0,0,0,0,0
+wnd_dir,-1,0,0,0,-1,0,0,0
