@@ -409,7 +409,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--layers", type=int, default=2, help="Transformer encoder layers.")
     parser.add_argument("--ff-dim", type=int, default=128, help="Feedforward dimension inside Transformer blocks.")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout probability.")
-    parser.add_argument("--patience", type=int, default=5, help="Epochs to wait for validation RMSE improvement before stopping.")
+    parser.add_argument("--patience", type=int, default=9999, help="Epochs to wait for validation RMSE improvement before stopping.")
     parser.add_argument("--min-delta", type=float, default=0.0, help="Minimum RMSE improvement to reset patience.")
     parser.add_argument("--log-every", type=int, default=5, help="How often to log progress (epochs).")
     parser.add_argument("--grad-clip", type=float, default=0.0, help="Gradient-norm clipping value (0 disables clipping).")
@@ -451,7 +451,10 @@ def main() -> None:
         test_csv_path=args.test_path,
     )
 
-    train_loader, test_loader, scaler, target_idx = prepare_dataloaders(config, batch_size=args.batch_size)
+    train_loader, test_loader, scaler, target_idx = prepare_dataloaders(
+        config,
+        batch_size=args.batch_size,
+    )
 
     attention_max_lag = args.attention_max_lag
     if attention_max_lag is None:
